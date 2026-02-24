@@ -1,0 +1,87 @@
+name: 每两周股票分析
+
+on:
+  # 每两周的周一 18:00 (北京时间 UTC+8 = UTC 10:00)
+  schedule:
+    - cron: '0 10 */14 * 1'
+  
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Debug mode'
+        required: false
+        default: 'false'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run stock analysis
+        env:
+          # AI 模型配置
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL }}
+          AIHUBMIX_KEY: ${{ secrets.AIHUBMIX_KEY }}
+          
+          # 股票配置
+          STOCK_LIST: ${{ secrets.STOCK_LIST }}
+          
+          # 数据源配置
+          TAVILY_API_KEYS: ${{ secrets.TAVILY_API_KEYS }}
+          SERPAPI_API_KEYS: ${{ secrets.SERPAPI_API_KEYS }}
+          BOCHA_API_KEYS: ${{ secrets.BOCHA_API_KEYS }}
+          BRAVE_API_KEYS: ${{ secrets.BRAVE_API_KEYS }}
+          TUSHARE_TOKEN: ${{ secrets.TUSHARE_TOKEN }}
+          
+          # 通知渠道配置
+          WECHAT_WEBHOOK_URL: ${{ secrets.WECHAT_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          EMAIL_SENDER: ${{ secrets.EMAIL_SENDER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_RECEIVERS: ${{ secrets.EMAIL_RECEIVERS }}
+          EMAIL_SENDER_NAME: ${{ secrets.EMAIL_SENDER_NAME }}
+          PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          SERVERCHAN3_SENDKEY: ${{ secrets.SERVERCHAN3_SENDKEY }}
+          CUSTOM_WEBHOOK_URLS: ${{ secrets.CUSTOM_WEBHOOK_URLS }}
+          
+          # 其他配置
+          WECHAT_MSG_TYPE: ${{ secrets.WECHAT_MSG_TYPE }}
+          NEWS_MAX_AGE_DAYS: ${{ secrets.NEWS_MAX_AGE_DAYS }}
+          BIAS_THRESHOLD: ${{ secrets.BIAS_THRESHOLD }}
+          AGENT_MODE: ${{ secrets.AGENT_MODE }}
+          AGENT_MAX_STEPS: ${{ secrets.AGENT_MAX_STEPS }}
+          REPORT_TYPE: ${{ secrets.REPORT_TYPE }}
+          REPORT_SUMMARY_ONLY: ${{ secrets.REPORT_SUMMARY_ONLY }}
+          ANALYSIS_DELAY: ${{ secrets.ANALYSIS_DELAY }}
+          MERGE_EMAIL_NOTIFICATION: ${{ secrets.MERGE_EMAIL_NOTIFICATION }}
+          SINGLE_STOCK_NOTIFY: ${{ secrets.SINGLE_STOCK_NOTIFY }}
+          WEBHOOK_VERIFY_SSL: ${{ secrets.WEBHOOK_VERIFY_SSL }}
+          
+        run: |
+          python main.py
+
+      - name: Upload logs (if failed)
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: logs
+          path: logs/
