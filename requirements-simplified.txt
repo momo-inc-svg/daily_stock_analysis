@@ -1,0 +1,40 @@
+# 简化版依赖列表 - Python 3.8 兼容
+python-dotenv>=1.0.0
+tenacity>=8.2.0
+sqlalchemy>=2.0.0
+schedule>=1.2.0
+
+# 数据源
+efinance>=0.5.5
+akshare>=1.12.0
+tushare>=1.4.0
+pytdx>=1.72
+baostock>=0.8.0
+yfinance>=0.2.0
+
+# 数据处理
+pandas>=2.0.0
+numpy>=1.24.0
+json-repair>=0.30.0
+
+# AI 分析（只保留 OpenAI 兼容）
+openai>=1.0.0
+
+# 搜索引擎
+tavily-python>=0.3.0
+google-search-results>=2.4.0
+
+# 网络请求
+requests>=2.31.0
+markdown2>=2.4.0
+fake-useragent>=1.4.0
+httpx[socks]
+
+# Web 框架
+fastapi>=0.109.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.6
+
+# 邮件支持
+smtplib  # Python 内置
+email    # Python 内置
