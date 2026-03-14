@@ -1,8 +1,18 @@
 import { useState } from 'react';
 import type React from 'react';
 import { EyeToggleIcon, Select } from '../common';
-import type { ConfigValidationIssue, SystemConfigItem } from '../../types/systemConfig';
+import type { ConfigValidationIssue, SystemConfigFieldSchema, SystemConfigItem } from '../../types/systemConfig';
 import { getFieldDescriptionZh, getFieldTitleZh } from '../../utils/systemConfigI18n';
+
+function normalizeSelectOptions(options: SystemConfigFieldSchema['options'] = []) {
+  return options.map((option) => {
+    if (typeof option === 'string') {
+      return { value: option, label: option };
+    }
+
+    return option;
+  });
+}
 
 function isMultiValueField(item: SystemConfigItem): boolean {
   const validation = (item.schema?.validation ?? {}) as Record<string, unknown>;
@@ -37,6 +47,8 @@ function renderFieldControl(
   onChange: (nextValue: string) => void,
   isSecretVisible: boolean,
   onToggleSecretVisible: () => void,
+  isPasswordEditable: boolean,
+  onPasswordFocus: () => void,
 ) {
   const schema = item.schema;
   const commonClass = 'input-terminal';
@@ -59,7 +71,7 @@ function renderFieldControl(
         <Select
           value={value}
           onChange={onChange}
-          options={schema.options.map((option) => ({ value: option, label: option }))}
+          options={normalizeSelectOptions(schema.options)}
           disabled={disabled || !schema.isEditable}
           placeholder="请选择"
         />
@@ -91,6 +103,8 @@ function renderFieldControl(
             <div className="flex items-center gap-2" key={`${item.key}-${index}`}>
               <input
                 type={isSecretVisible ? 'text' : 'password'}
+                readOnly={!isPasswordEditable}
+                onFocus={onPasswordFocus}
                 className={`${commonClass} flex-1`}
                 value={entry}
                 disabled={disabled || !schema?.isEditable}
@@ -142,6 +156,8 @@ function renderFieldControl(
       <div className="flex items-center gap-2">
         <input
           type={isSecretVisible ? 'text' : 'password'}
+          readOnly={!isPasswordEditable}
+          onFocus={onPasswordFocus}
           className={`${commonClass} flex-1`}
           value={value}
           disabled={disabled || !schema?.isEditable}
@@ -187,6 +203,7 @@ export const SettingsField: React.FC<SettingsFieldProps> = ({
   const description = getFieldDescriptionZh(item.key);
   const hasError = issues.some((issue) => issue.severity === 'error');
   const [isSecretVisible, setIsSecretVisible] = useState(false);
+  const [isPasswordEditable, setIsPasswordEditable] = useState(false);
 
   return (
     <div className={`rounded-xl border p-4 ${hasError ? 'border-red-500/35' : 'border-white/8'} bg-elevated/50`}>
@@ -213,6 +230,8 @@ export const SettingsField: React.FC<SettingsFieldProps> = ({
           (nextValue) => onChange(item.key, nextValue),
           isSecretVisible,
           () => setIsSecretVisible((previous) => !previous),
+          isPasswordEditable,
+          () => setIsPasswordEditable(true),
         )}
       </div>
 
